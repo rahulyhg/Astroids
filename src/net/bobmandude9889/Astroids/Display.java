@@ -60,9 +60,13 @@ public class Display extends JPanel implements Runnable{
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 		g.setColor(Color.WHITE);
-		g.drawString("FPS: " + fps, 0, 10);
 		if(ship != null){
-			g.drawString("Ship: ", 0, 30);
+			ship.render(g);
+			for(int i = 0; i < ship.bulletHandler.vel.size(); i++){
+				Bullet b = (Bullet) ship.bulletHandler.get(i);
+				if(!b.isInScreen(frame.getSize())) ship.bulletHandler.vel.remove(i);
+				b.render(g);
+			}g.drawString("Ship: ", 0, 30);
 			g.drawString("Rotation = " + (ship.rotation * (180 / Math.PI)), 0, 40);
 			g.drawString("Pos = " + ship.pos.x + " , " + ship.pos.y, 0, 50);
 			g.drawString("Vel = " + ship.vel.x + " , "+  ship.vel.y, 0, 60);
@@ -72,13 +76,8 @@ public class Display extends JPanel implements Runnable{
 				g.drawString("Pos = " + b.pos.x + " , " + b.pos.y, 0, 90);
 				g.drawString("Vel = " + b.vel.x + " , " + b.vel.y, 0, 100);
 			}
-			ship.render(g);
-			for(int i = 0; i < ship.bulletHandler.vel.size(); i++){
-				Bullet b = (Bullet) ship.bulletHandler.get(i);
-				if(!b.isInScreen(frame.getSize())) ship.bulletHandler.vel.remove(i);
-				b.render(g);
-			}
 		}
+		g.drawString("FPS: " + fps, 0, 10);
 	}
 	
 }

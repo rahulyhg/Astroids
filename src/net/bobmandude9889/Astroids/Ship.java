@@ -10,75 +10,86 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 
-public class Ship implements MouseMotionListener, MouseListener, KeyListener, Moveable{
+public class Ship implements MouseMotionListener, MouseListener, KeyListener,
+		Moveable {
 
 	Location pos;
-	
+
 	double rotation = 0;
 	double h = 0;
-	
+
 	public Velocity vel;
-	
-	int speed = 6;
-	
+
+	int speed = 8;
+
 	BufferedImage original;
 	BufferedImage image;
-	
+
 	ClassLoader cl = this.getClass().getClassLoader();
-	
+
 	long lastRotation = System.currentTimeMillis();
-	
+
 	int size = 50;
-	
+
 	VelocityHandler bulletHandler;
-	
+
 	Point mousePos;
-	
-	public Ship(Location location){
+
+	List<Integer> keysPressed = new ArrayList<Integer>();
+
+	public Ship(Location location) {
 		this.pos = location;
-		this.original = new BufferedImage(size,size,BufferedImage.TYPE_INT_RGB);
-		original.getGraphics().drawImage(new ImageIcon(cl.getResource("assets/ship.png")).getImage(),0,0,size,size,null);
-		this.image = new BufferedImage(size,size,BufferedImage.TYPE_INT_RGB);
-		this.image.getGraphics().drawImage(original,0,0,null);
+		this.original = new BufferedImage(size, size,
+				BufferedImage.TYPE_INT_RGB);
+		original.getGraphics().drawImage(
+				new ImageIcon(cl.getResource("assets/ship.png")).getImage(), 0,
+				0, size, size, null);
+		this.image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		this.image.getGraphics().drawImage(original, 0, 0, null);
 		bulletHandler = new VelocityHandler();
-		vel = new Velocity(0,0);
-		mousePos = new Point(0,0);
+		vel = new Velocity(0, 0);
+		mousePos = new Point(0, 0);
 	}
-	
-	public void updateRotation(){
+
+	public void updateRotation() {
 		Point p = (Point) mousePos.clone();
-		Location loc = new Location(pos.x,pos.y);
+		Location loc = new Location(pos.x, pos.y);
 		p.x -= 400;
 		p.y = -(p.y - 300);
 		loc.x -= 400;
 		loc.y = -(loc.y - 300);
-		
+
 		p.x = (int) (p.x - loc.x);
 		p.y = (int) (p.y - loc.y);
-		
+
 		boolean flip = p.y < 0;
-		
-		h = Math.sqrt(Math.pow(p.x,2) + Math.pow(p.y,2));
+
+		h = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
 		rotation = Math.asin(p.x / h);
-		
-		if(flip){
-			 rotation += 2 * (Math.toRadians(90) - rotation);
+
+		if (flip) {
+			rotation += 2 * (Math.toRadians(90) - rotation);
 		}
-		
-		if(rotation < 0){
+
+		if (rotation < 0) {
 			rotation = Math.toRadians(360) + rotation;
 		}
-		
-		AffineTransform rt = AffineTransform.getRotateInstance(rotation,size / 2,size / 2);
-		AffineTransformOp rtOp = new AffineTransformOp(rt,AffineTransformOp.TYPE_BILINEAR);
+
+		AffineTransform rt = AffineTransform.getRotateInstance(rotation,
+				size / 2, size / 2);
+		AffineTransformOp rtOp = new AffineTransformOp(rt,
+				AffineTransformOp.TYPE_BILINEAR);
 		image = rtOp.filter(original, null);
 	}
-	
-	public void render(Graphics g){
-		g.drawImage(image,(int) (pos.x - (size / 2)),(int) (pos.y - (size / 2)),null);
+
+	public void render(Graphics g) {
+		g.drawImage(image, (int) (pos.x - (size / 2)),
+				(int) (pos.y - (size / 2)), null);
 	}
 
 	@Override
@@ -114,33 +125,24 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener, Mo
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		switch(e.getKeyCode()){
-		case 65:
-			vel.x = -speed;
-			break;
-		case 87:
-			vel.y = -speed;
-			break;
-		case 68:
-			vel.x = speed;
-			break;
-		case 83:
-			vel.y = speed;
-			break;
-		default:
-			break;
+		if (!keysPressed.contains(e.getKeyCode())) {
+			keysPressed.add(e.getKeyCode());
 		}
 		updateRotation();
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		int c = e.getKeyCode();
-		if(c == 65 || c == 68){
-			vel.x = 0;
-		} else if(c == 87 || c == 83){
-			vel.y = 0;
+		keysPressed.remove(find(e.getKeyCode(), keysPressed));
+	}
+
+	public int find(int i, List<Integer> list) {
+		for (int index = 0; index < list.size(); index++) {
+			if (list.get(index) == i) {
+				return index;
+			}
 		}
+		return -1;
 	}
 
 	@Override
@@ -149,6 +151,30 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener, Mo
 
 	@Override
 	public Velocity getVel() {
+
+		double decrease = 0.1;
+		double increase = 0.25;
+		
+		if (keysPressed.contains(65) && vel.x > -speed) {
+			vel.x -= increase;
+		} else if (keysPressed.contains(68) && vel.x < speed) {
+			vel.x += increase;
+		} else if (vel.x < 0) {
+			vel.x = vel.x + decrease;
+		} else if (vel.x > 0) {
+			vel.x = vel.x - decrease;
+		}
+
+		if (keysPressed.contains(87) && vel.y > -speed) {
+			vel.y -= increase;
+		} else if (keysPressed.contains(83) && vel.y < speed) {
+			vel.y += increase;
+		} else if (vel.y < 0) {
+			vel.y = vel.y + decrease;
+		} else if (vel.y > 0) {
+			vel.y = vel.y - decrease;
+		}
+
 		return vel;
 	}
 
@@ -156,11 +182,11 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener, Mo
 	public Location getPos() {
 		return pos;
 	}
-	
+
 	@Override
 	public void setPos(Location pos) {
 		updateRotation();
 		this.pos = pos;
 	}
-	
+
 }

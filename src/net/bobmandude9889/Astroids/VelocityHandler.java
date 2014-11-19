@@ -1,7 +1,7 @@
 package net.bobmandude9889.Astroids;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class VelocityHandler implements Runnable{
 	
@@ -12,7 +12,7 @@ public class VelocityHandler implements Runnable{
 	long lastMove = System.currentTimeMillis();
 	
 	public VelocityHandler(){
-		vel = new ArrayList<Moveable>();
+		vel = new CopyOnWriteArrayList<Moveable>();
 		thread.start();
 	}
 

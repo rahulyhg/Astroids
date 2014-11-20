@@ -13,15 +13,26 @@ public class Astroid implements Moveable {
 	Location pos;
 	Velocity vel;
 	
+	List<Point> points;
+	
 	public Astroid(int type, int size, Location pos, Velocity vel){
 		this.type = type;
 		this.size = size;
 		this.pos = pos;
 		this.vel = vel;
+		this.points = new ArrayList<Point>();
 	}
 	
 	public void render(Graphics g){
-		g.fillOval((int) pos.x, (int) pos.y, size, size);
+		BufferedImage img = new BufferedImage(size,size,BufferedImage.TRANSLUCENT);
+		img.getGraphics().fillOval((int) pos.x, (int) pos.y, size, size);
+		for(int x = 0; x < img.getWidth()){
+			for(int y = 0; y < img.getHeight()){
+				if(/**Is Translucent */){
+					
+				}
+			}
+		}
 	}
 	
 	@Override

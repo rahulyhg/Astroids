@@ -1,7 +1,9 @@
 package net.bobmandude9889.Astroids;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -161,8 +163,10 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 			vel.x += increase;
 		} else if (vel.x < 0) {
 			vel.x = vel.x + decrease;
+			if(vel.x > 0) vel.x = 0;
 		} else if (vel.x > 0) {
 			vel.x = vel.x - decrease;
+			if(vel.x < 0) vel.x = 0;
 		}
 
 		if (keysPressed.contains(87) && vel.y > -speed) {
@@ -171,8 +175,10 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 			vel.y += increase;
 		} else if (vel.y < 0) {
 			vel.y = vel.y + decrease;
+			if(vel.y > 0) vel.y = 0;
 		} else if (vel.y > 0) {
 			vel.y = vel.y - decrease;
+			if(vel.y < 0) vel.y = 0;
 		}
 
 		return vel;
@@ -188,5 +194,9 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 		updateRotation();
 		this.pos = pos;
 	}
-
+	
+	public Rectangle getRect(){
+		return new Rectangle(new Point((int) (pos.x - (size / 2)), (int) (pos.y - (size / 2))), new Dimension(image.getWidth(),image.getHeight()));
+	}
+	
 }

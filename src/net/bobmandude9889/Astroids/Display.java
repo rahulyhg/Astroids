@@ -2,6 +2,8 @@ package net.bobmandude9889.Astroids;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -17,9 +19,14 @@ public class Display extends JPanel implements Runnable{
 	Ship ship;
 	VelocityHandler shipVelHandler;
 	
+	List<Astroid> astroids;
+	VelocityHandler astroidVelHandler;
+	
 	int fps = 0;
 	long lastFrame = System.currentTimeMillis();
 	int frames;
+	
+	CollisionHandler ch;
 	
 	public Display(Frame frame){
 		this.frame = frame;
@@ -36,6 +43,13 @@ public class Display extends JPanel implements Runnable{
 		frame.addKeyListener(ship);
 		this.addMouseMotionListener(ship);
 		this.addMouseListener(ship);
+		
+		astroids = new ArrayList<Astroid>();
+		astroids.add(new Astroid(0,45,new Location(100,100), new Velocity(3,3)));
+		astroidVelHandler = new VelocityHandler();
+		astroidVelHandler.add(astroids.get(0));
+		
+		ch = new CollisionHandler(this);
 		
 		while(true){
 			repaint();
@@ -60,8 +74,11 @@ public class Display extends JPanel implements Runnable{
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 		g.setColor(Color.WHITE);
-		if(ship != null){
+		if(ship != null && astroids != null){
 			ship.render(g);
+			for(Astroid a : astroids){
+				a.render(g);
+			}
 			for(int i = 0; i < ship.bulletHandler.vel.size(); i++){
 				Bullet b = (Bullet) ship.bulletHandler.get(i);
 				if(!b.isInScreen(frame.getSize())) ship.bulletHandler.vel.remove(i);

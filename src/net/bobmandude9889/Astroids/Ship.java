@@ -14,6 +14,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.ImageIcon;
 
@@ -38,13 +39,15 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 
 	int size = 50;
 
-	VelocityHandler bulletHandler;
-
 	Point mousePos;
 
 	List<Integer> keysPressed = new ArrayList<Integer>();
 
-	public Ship(Location location) {
+	List<Point> points;
+	
+	Display display;
+	
+	public Ship(Location location, Display display) {
 		this.pos = location;
 		this.original = new BufferedImage(size, size,
 				BufferedImage.TYPE_INT_RGB);
@@ -53,11 +56,24 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 				0, size, size, null);
 		this.image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		this.image.getGraphics().drawImage(original, 0, 0, null);
-		bulletHandler = new VelocityHandler();
 		vel = new Velocity(0, 0);
 		mousePos = new Point(0, 0);
+		points = new CopyOnWriteArrayList<Point>();
+		this.display = display;
 	}
 
+	public void updatePoints(){
+		/*points.clear();
+		for(int x = 0; x < image.getWidth(); x++){
+			for(int y = 0; y < image.getHeight(); y++){
+				int rgb = image.getRGB(x, y);
+				if(rgb>>24 != 0x00){
+					points.add(new Point(x,y));
+				}
+			}
+		}*/
+	}
+	
 	public void updateRotation() {
 		Point p = (Point) mousePos.clone();
 		Location loc = new Location(pos.x, pos.y);
@@ -102,6 +118,7 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 	public void mouseMoved(MouseEvent e) {
 		mousePos = e.getPoint();
 		updateRotation();
+		updatePoints();
 	}
 
 	@Override
@@ -118,7 +135,7 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		bulletHandler.add(new Bullet(this));
+		shoot();
 	}
 
 	@Override
@@ -131,6 +148,7 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 			keysPressed.add(e.getKeyCode());
 		}
 		updateRotation();
+		updatePoints();
 	}
 
 	@Override
@@ -192,11 +210,25 @@ public class Ship implements MouseMotionListener, MouseListener, KeyListener,
 	@Override
 	public void setPos(Location pos) {
 		updateRotation();
+		updatePoints();
 		this.pos = pos;
 	}
 	
 	public Rectangle getRect(){
 		return new Rectangle(new Point((int) (pos.x - (size / 2)), (int) (pos.y - (size / 2))), new Dimension(image.getWidth(),image.getHeight()));
+	}
+	
+	@Override
+	public boolean isInScreen(Dimension screenSize){
+		return !((pos.x < 0 || pos.x > screenSize.width) || (pos.y < 0 || pos.y > screenSize.height)); 
+	}
+	
+	public void shoot(){
+		display.vh.add(new Bullet(this));
+	}
+	
+	public void shoot(double rotation){
+		display.vh.add(new Bullet(rotation, this));
 	}
 	
 }
